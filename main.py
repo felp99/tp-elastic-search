@@ -1,11 +1,9 @@
 import pandas as pd
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
-import json
 
-# Elasticsearch Configuration
-ES_HOST = "http://localhost:9200"  # Change to your Elasticsearch instance URL
-ES_INDEX = "crime_data"
+ES_HOST = "http://localhost:9200"
+ES_INDEX = "crimedata"
 
 # Initialize Elasticsearch client
 es = Elasticsearch([ES_HOST])
@@ -16,31 +14,27 @@ def create_index():
         mappings = {
             "mappings": {
                 "properties": {
-                    "DR_NO": {"type": "keyword"},
-                    "Date Rptd": {"type": "date", "format": "MM/dd/yyyy HH:mm:ss a"},
-                    "DATE OCC": {"type": "date", "format": "MM/dd/yyyy HH:mm:ss a"},
-                    "TIME OCC": {"type": "integer"},
+                    "DR_NO": {"type": "keyword"},  # Changed 'rowid' to 'DR_NO' for document ID
+                    "Date Rptd": {"type": "date"},
+                    "DATE OCC": {"type": "date"},
+                    "TIME OCC": {"type": "keyword"},
                     "AREA": {"type": "keyword"},
                     "AREA NAME": {"type": "keyword"},
-                    "Rpt Dist No": {"type": "integer"},
-                    "Part 1-2": {"type": "integer"},
-                    "Crm Cd": {"type": "integer"},
-                    "Crm Cd Desc": {"type": "text"},
+                    "Rpt Dist No": {"type": "keyword"},
+                    "Part 1-2": {"type": "keyword"},
+                    "Crm Cd": {"type": "keyword"},
+                    "Crm Cd Desc": {"type": "keyword"},
+                    "Mocodes": {"type": "keyword"},
                     "Vict Age": {"type": "integer"},
                     "Vict Sex": {"type": "keyword"},
                     "Vict Descent": {"type": "keyword"},
-                    "Premis Cd": {"type": "integer"},
-                    "Premis Desc": {"type": "text"},
-                    "Weapon Used Cd": {"type": "integer"},
-                    "Weapon Desc": {"type": "text"},
+                    "Premis Cd": {"type": "keyword"},
+                    "Premis Desc": {"type": "keyword"},
+                    "Weapon Used Cd": {"type": "keyword"},
+                    "Weapon Desc": {"type": "keyword"},
                     "Status": {"type": "keyword"},
-                    "Status Desc": {"type": "text"},
-                    "Crm Cd 1": {"type": "integer"},
-                    "Crm Cd 2": {"type": "integer"},
-                    "Crm Cd 3": {"type": "integer"},
-                    "Crm Cd 4": {"type": "integer"},
-                    "LOCATION": {"type": "geo_point"},
-                    "Cross Street": {"type": "keyword"},
+                    "Status Desc": {"type": "keyword"},
+                    "LOCATION": {"type": "geo_point"},  # Assuming 'LOCATION' is geospatial
                     "LAT": {"type": "float"},
                     "LON": {"type": "float"}
                 }
@@ -54,13 +48,15 @@ def create_index():
 def load_csv_to_elasticsearch(csv_file):
     """Reads a CSV file and inserts records into Elasticsearch."""
     df = pd.read_csv(csv_file)
-    df.fillna("", inplace=True)  # Replace NaN values with empty strings
+    print("Columns in CSV:", df.columns)
+
+    df.fillna("", inplace=True)  # Handle missing values
 
     # Convert DataFrame rows to JSON and insert into Elasticsearch
     actions = [
         {
             "_index": ES_INDEX,
-            "_id": row["DR_NO"],
+            "_id": row["rowid"],
             "_source": row.to_dict()
         }
         for _, row in df.iterrows()
@@ -71,4 +67,4 @@ def load_csv_to_elasticsearch(csv_file):
 
 if __name__ == "__main__":
     create_index()
-    load_csv_to_elasticsearch("crime_data.csv")  # Replace with your CSV file
+    load_csv_to_elasticsearch("Crime_Data.csv")
