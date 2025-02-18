@@ -52,11 +52,10 @@ def load_csv_to_elasticsearch(csv_file):
 
     df.fillna("", inplace=True)  # Handle missing values
 
-    # Convert DataFrame rows to JSON and insert into Elasticsearch
     actions = [
         {
             "_index": ES_INDEX,
-            "_id": row["rowid"],
+            "_id": row["DR_NO"],  # Use 'DR_NO' as the document ID
             "_source": row.to_dict()
         }
         for _, row in df.iterrows()
