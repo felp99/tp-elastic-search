@@ -5,7 +5,6 @@ from elasticsearch.helpers import bulk
 ES_HOST = "http://localhost:9200"
 ES_INDEX = "crimedata"
 
-# Initialize Elasticsearch client
 es = Elasticsearch([ES_HOST])
 
 def create_index():
