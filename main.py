@@ -9,53 +9,17 @@ ES_INDEX = "crimedata"
 es = Elasticsearch([ES_HOST])
 
 def create_index():
-    """Creates an index with mapping if it doesn't exist."""
     if not es.indices.exists(index=ES_INDEX):
-        mappings = {
-            "mappings": {
-                "properties": {
-                    "DR_NO": {"type": "keyword"},  # Changed 'rowid' to 'DR_NO' for document ID
-                    "Date Rptd": {"type": "date"},
-                    "DATE OCC": {"type": "date"},
-                    "TIME OCC": {"type": "keyword"},
-                    "AREA": {"type": "keyword"},
-                    "AREA NAME": {"type": "keyword"},
-                    "Rpt Dist No": {"type": "keyword"},
-                    "Part 1-2": {"type": "keyword"},
-                    "Crm Cd": {"type": "keyword"},
-                    "Crm Cd Desc": {"type": "keyword"},
-                    "Mocodes": {"type": "keyword"},
-                    "Vict Age": {"type": "integer"},
-                    "Vict Sex": {"type": "keyword"},
-                    "Vict Descent": {"type": "keyword"},
-                    "Premis Cd": {"type": "keyword"},
-                    "Premis Desc": {"type": "keyword"},
-                    "Weapon Used Cd": {"type": "keyword"},
-                    "Weapon Desc": {"type": "keyword"},
-                    "Status": {"type": "keyword"},
-                    "Status Desc": {"type": "keyword"},
-                    "LOCATION": {"type": "geo_point"},  # Assuming 'LOCATION' is geospatial
-                    "LAT": {"type": "float"},
-                    "LON": {"type": "float"}
-                }
-            }
-        }
-        es.indices.create(index=ES_INDEX, body=mappings)
-        print(f"Index '{ES_INDEX}' created successfully.")
-    else:
-        print(f"Index '{ES_INDEX}' already exists.")
+        es.indices.create(index=ES_INDEX)
 
 def load_csv_to_elasticsearch(csv_file):
-    """Reads a CSV file and inserts records into Elasticsearch."""
     df = pd.read_csv(csv_file)
-    print("Columns in CSV:", df.columns)
-
-    df.fillna("", inplace=True)  # Handle missing values
+    df.fillna("", inplace=True)
 
     actions = [
         {
             "_index": ES_INDEX,
-            "_id": row["DR_NO"],  # Use 'DR_NO' as the document ID
+            "_id": row["DR_NO"],
             "_source": row.to_dict()
         }
         for _, row in df.iterrows()
